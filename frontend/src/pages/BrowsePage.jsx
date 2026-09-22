@@ -1,0 +1,2 @@
+import ContentCard from '../components/ContentCard'; import { content } from '../data/content';
+export default function BrowsePage({ type }) { const items = content.filter((item) => item.type === type); return <main className="page"><p className="eyebrow">Discover your next favorite</p><h1>{type}s</h1><div className="content-grid">{items.map((item) => <ContentCard key={item.id} item={item} />)}</div></main>; }

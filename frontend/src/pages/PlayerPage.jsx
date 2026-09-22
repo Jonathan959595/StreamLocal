@@ -1,0 +1,2 @@
+import { Link, useParams } from 'react-router-dom'; import { findContent } from '../data/content';
+export default function PlayerPage() { const item = findContent(useParams().id); return <main className="player-page"><Link to={`/details/${item?.id}`} className="player-back">‹ Back</Link><div className="player-shell"><div className="player-placeholder">▶<p>Ready to play</p><small>Connect this UI to <code>/api/stream/{item?.id}</code> when the local streaming backend is ready.</small></div></div><h1>{item?.title || 'Unknown title'}</h1></main>; }

@@ -1,0 +1,2 @@
+import { Link } from 'react-router-dom';
+export default function ProfilesPage() { return <main className="profiles"><p className="eyebrow">StreamLocal</p><h1>Who’s watching?</h1><div className="profile-list"><Link to="/" className="profile-tile"><b>J</b><span>Jonathan</span></Link><button className="profile-tile kids"><b>★</b><span>Kids</span></button><button className="profile-tile add"><b>+</b><span>Add Profile</span></button></div><button className="manage-button">Manage profiles</button></main>; }

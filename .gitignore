@@ -8,3 +8,6 @@ videos/
 
 .DS_Store
 Thumbs.db
+
+# Frontend build output
+frontend/dist/
