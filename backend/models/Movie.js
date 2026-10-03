@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const movieSchema = new mongoose.Schema(
     {
+        contentId: {
+            type: String,
+            required: true,
+            unique: true,
+            index: true,
+            trim: true
+        },
         title: {
             type: String,
             required: true,
@@ -27,7 +34,7 @@ const movieSchema = new mongoose.Schema(
         },
         videoPath: {
             type: String,
-            required: true,
+            default: null,
             trim: true
         }
     },
