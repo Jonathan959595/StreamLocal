@@ -35,7 +35,11 @@ const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({
             email: normalizedEmail,
-            password: hashedPassword
+            password: hashedPassword,
+            profiles: [
+                { profileId: new (require("mongoose").Types.ObjectId)().toString(), name: normalizedEmail.split("@")[0] },
+                { profileId: new (require("mongoose").Types.ObjectId)().toString(), name: "Children", isKids: true }
+            ]
         });
 
         await user.save();
@@ -117,4 +121,23 @@ const getCurrentUser = async (req, res) => {
     }
 };
 
-module.exports = { register, login, getCurrentUser };
+const createProfile = async (req, res) => {
+    const { name, avatar = "", isKids = false } = req.body || {};
+    if (typeof name !== "string" || !name.trim()) return res.status(400).json({ message: "Profile name is required" });
+    try {
+        const user = await User.findById(req.user);
+        if (!user) return res.status(401).json({ message: "User not found" });
+        if (user.profiles.length >= 4) return res.status(400).json({ message: "You can create up to four profiles" });
+        const profile = { profileId: new (require("mongoose").Types.ObjectId)().toString(), name: name.trim(), avatar: String(avatar).slice(0, 32), isKids: Boolean(isKids) };
+        user.profiles.push(profile);
+        await user.save();
+        return res.status(201).json({ profile, profiles: user.profiles });
+    } catch { return res.status(500).json({ message: "Unable to create profile" }); }
+};
+
+const logout = (req, res) => {
+    res.clearCookie("stream_access", { path: "/api/stream", httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" });
+    return res.status(204).end();
+};
+
+module.exports = { register, login, getCurrentUser, createProfile, logout };

@@ -1,8 +1,10 @@
 const Movie = require("../models/Movie");
+const { state, wait } = require("../services/chaosState");
 const contentFields = "contentId title description contentType tags posterPath videoPath";
 
 const getFeed = async (req, res) => {
     try {
+        if (state.dbDelay) await wait(5000);
         const [trending, action, sciFi, movies, series] = await Promise.all([
             Movie.find().select(contentFields).sort({ createdAt: -1 }).limit(12),
             Movie.find({ tags: "Action" }).select(contentFields).limit(12),
@@ -31,9 +33,9 @@ const searchContent = async (req, res) => {
     }
 
     try {
-        const results = await Movie.find({ $text: { $search: query } }, { score: { $meta: "textScore" } })
-            .select(contentFields)
-            .sort({ score: { $meta: "textScore" } });
+        if (state.dbDelay) await wait(5000);
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const results = await Movie.find({ $or: [{ title: { $regex: escaped, $options: "i" } }, { tags: { $regex: escaped, $options: "i" } }] }).select(contentFields);
 
         return res.status(200).json(results);
     } catch (error) {

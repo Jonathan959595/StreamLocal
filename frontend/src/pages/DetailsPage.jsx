@@ -1,2 +1,67 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'; import { useDispatch, useSelector } from 'react-redux'; import { findContent, rows } from '../data/content'; import { toggleMyList } from '../redux/store'; import ContentRow from '../components/ContentRow'; import EmptyState from '../components/EmptyState';
-export default function DetailsPage() { const item = findContent(useParams().id); const navigate = useNavigate(); const dispatch = useDispatch(); const inList = useSelector((state) => item && state.myList.includes(item.id)); if (!item) return <main className="page"><EmptyState title="Content not found" message="This title is not available in the local catalog." /></main>; const recommendations = (rows.sciFi.some((entry) => entry.id === item.id) ? rows.sciFi : rows.trending).filter((entry) => entry.id !== item.id); return <main className="detail-page"><div className="detail-backdrop" style={{ backgroundImage: `linear-gradient(90deg,#07090d 4%,rgba(7,9,13,.72) 45%,#07090d 100%),url(${item.image})` }}><button className="detail-back" onClick={() => navigate(-1)} aria-label="Go back">‹ Back</button><div><p className="eyebrow">{item.type}</p><h1>{item.title}</h1><p className="metadata"><b>{item.rating} ★</b> · {item.year} · {item.duration} · {item.genre}</p><p>{item.description}</p><div className="button-row"><Link className="button button-main" to={`/watch/${item.id}`}>▶ Play</Link><button className="button button-muted" onClick={() => dispatch(toggleMyList(item.id))}>{inList ? '✓ In My List' : '+ My List'}</button></div></div></div><ContentRow title="More like this" items={recommendations} /></main>; }
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { findContent, rows } from '../data/content';
+import { toggleMyList } from '../redux/store';
+import ContentRow from '../components/ContentRow';
+import EmptyState from '../components/EmptyState';
+import PlaybackAccessDialog, { hasActiveSubscription } from '../components/PlaybackAccessDialog';
+
+export default function DetailsPage() {
+  const { id } = useParams();
+  const item = findContent(id);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const session = useSelector((state) => state.auth);
+  const inList = useSelector((state) => item && state.myList.includes(item.id));
+  const [showGate, setShowGate] = useState(false);
+  const canPlay = hasActiveSubscription(session) && !item?.unavailable;
+
+  if (!item) {
+    return (
+      <main className="page">
+        <EmptyState title="Content not found" message="This title is not available in the local catalog." />
+      </main>
+    );
+  }
+
+  const recommendations = (rows.sciFi.some((entry) => entry.id === item.id) ? rows.sciFi : rows.trending).filter((entry) => entry.id !== item.id);
+
+  return (
+    <>
+      <main className="detail-page">
+        <div
+          className="detail-backdrop"
+          style={{ backgroundImage: `linear-gradient(90deg,#07090d 4%,rgba(7,9,13,.72) 45%,#07090d 100%),url(${item.image})` }}
+        >
+          <button className="detail-back" onClick={() => navigate(-1)} aria-label="Go back">‹ Back</button>
+          <div>
+            <p className="eyebrow">{item.type}</p>
+            <h1>{item.title}</h1>
+            <p className="metadata"><b>{item.rating} ★</b> · {item.year} · {item.duration} · {item.genre}</p>
+            <p>{item.description}</p>
+            <div className="button-row">
+              {canPlay ? (
+                <Link className="button button-main" to={`/watch/${item.id}`}>▶ Play</Link>
+              ) : (
+                <button className="button button-main" onClick={() => setShowGate(true)}>▶ Play</button>
+              )}
+              <button className="button button-muted" onClick={() => dispatch(toggleMyList(item.id))}>
+                {inList ? '✓ In My List' : '+ My List'}
+              </button>
+            </div>
+          </div>
+        </div>
+        <ContentRow title="More like this" items={recommendations} />
+      </main>
+      {showGate && (
+        <PlaybackAccessDialog
+          session={session}
+          item={item}
+          isUnavailable={Boolean(item?.unavailable)}
+          onClose={() => setShowGate(false)}
+        />
+      )}
+    </>
+  );
+}

@@ -1,4 +1,5 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -15,7 +16,10 @@ import SubscriptionPage from './pages/SubscriptionPage';
 
 export default function App() {
     const location = useLocation();
+    const session = useSelector((state) => state.auth);
     const focusedRoute = ['/login', '/register', '/profiles'].includes(location.pathname) || location.pathname.startsWith('/watch/');
+
+    if (session?.token && !session.selectedProfileId && !['/profiles', '/login', '/register'].includes(location.pathname)) return <Navigate to="/profiles" replace />;
 
     return (
         <div className="app-shell">

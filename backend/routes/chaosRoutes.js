@@ -1,0 +1,2 @@
+const express = require("express"); const auth = require("../middleware/authMiddleware"); const c = require("../controllers/chaosController");
+const router = express.Router(); router.use(auth); router.post("/db-delay", c.dbDelay); router.post("/storage-fault", c.storageFault); router.post("/payment-timeout", c.paymentTimeout); router.post("/cpu-spike", c.cpuSpike); router.post("/auth-drop", c.authDrop); module.exports = router;

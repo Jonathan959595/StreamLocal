@@ -23,7 +23,21 @@ export const content = [
   series('loki', 'Loki', 2021, 'Fantasy', '2 Seasons', '8.2', 'The god of mischief steps outside the timeline.'),
   series('the-mandalorian', 'The Mandalorian', 2019, 'Sci-Fi', '3 Seasons', '8.6', 'A lone bounty hunter crosses the outer reaches of the galaxy.'),
 ];
+export const isKidsSafe = (item) => {
+  if (!item) return false;
+  const matureIds = ['joker', 'john-wick', 'breaking-bad', 'game-of-thrones', 'gladiator'];
+  if (matureIds.includes(item.id)) return false;
+  if (item.genre === 'Thriller' || item.genre === 'Horror') return false;
+  return true;
+};
+
+export const getFilteredContent = (isKids = false) => {
+  if (!isKids) return content;
+  return content.filter(isKidsSafe);
+};
+
 export const findContent = (id) => content.find((item) => item.id === id);
+
 export const rows = {
   trending: content.slice(0, 8),
   popularMovies: content.filter((item) => item.type === 'Movie').slice(6),

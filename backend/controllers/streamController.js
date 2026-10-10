@@ -1,11 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 const Movie = require("../models/Movie");
+const { state } = require("../services/chaosState");
+const { log } = require("../services/telemetry");
 
 const videosDirectory = path.resolve(__dirname, "..", "videos");
 
 const streamVideo = async (req, res) => {
     let movie;
+    if (state.storageFault) { log("error", "storage_fault_injected", { contentId: req.params.contentId }); return res.status(503).json({ message: "Local storage temporarily unavailable" }); }
 
     try {
         movie = await Movie.findOne({ contentId: req.params.contentId });

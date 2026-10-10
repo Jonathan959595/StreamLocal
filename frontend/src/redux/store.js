@@ -11,11 +11,13 @@ const authSlice = createSlice({
   initialState: savedSession,
   reducers: {
     setSession: (_, action) => action.payload,
+    updateUser: (state, action) => state ? { ...state, user: action.payload } : state,
+    setSelectedProfile: (state, action) => state ? { ...state, selectedProfileId: action.payload } : state,
     clearSession: () => null,
   },
 });
 export const { toggleMyList } = myListSlice.actions;
-export const { setSession, clearSession } = authSlice.actions;
+export const { setSession, updateUser, setSelectedProfile, clearSession } = authSlice.actions;
 export const store = configureStore({ reducer: { myList: myListSlice.reducer, auth: authSlice.reducer } });
 store.subscribe(() => {
   const state = store.getState();
